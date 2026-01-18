@@ -16,8 +16,11 @@ Automate your X (Twitter) account research workflow. Replace 3-4 hours of manual
 ```bash
 cd x-research
 
-# Install dependencies
-pip install anthropic pandas
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Install browser for automatic fetching
+playwright install chromium
 ```
 
 ### 2. Configure API Key
@@ -28,7 +31,17 @@ python x-research.py config
 
 You'll need an Anthropic API key. Get one at: https://console.anthropic.com/
 
-### 3. Add Your First Data
+### 3. Get Tweet Data
+
+**Option A: Automatic Fetching (Recommended)**
+
+Let the tool automatically fetch tweets for you:
+
+```bash
+python x-research.py fetch --accounts @sama,@levelsio,@patrick --count 20
+```
+
+**Option B: Manual Import**
 
 Create a CSV file with your tweet data (see `template.csv` for format):
 
@@ -81,6 +94,33 @@ python x-research.py add data/tweets.json
 - `tweet_url` - Link to the tweet
 - `likes`, `retweets`, `replies` - Engagement metrics
 - `notes` - Your observations
+
+### `fetch` - Automatically Fetch Tweets
+
+```bash
+# Fetch tweets from specific accounts
+python x-research.py fetch --accounts @sama,@levelsio,@patrick
+
+# Fetch more tweets per account
+python x-research.py fetch --accounts @sama --count 50
+
+# Show browser window (for debugging)
+python x-research.py fetch --accounts @sama --show-browser
+```
+
+**How it works:**
+- Uses browser automation (Playwright) to visit X profiles
+- Extracts recent tweets with engagement metrics
+- Automatically stores them in your database
+- Skips duplicates if you've already fetched them
+
+**Requirements:**
+After installing dependencies, run:
+```bash
+playwright install chromium
+```
+
+**Note:** This uses browser automation to fetch publicly visible tweets. Only fetches what you can see when visiting the profile page.
 
 ### `analyze` - Generate Insights
 
@@ -153,38 +193,60 @@ Interactive setup for:
 
 **Initial Setup (one time):**
 ```bash
+# Install and configure
+pip install -r requirements.txt
+playwright install chromium
 python x-research.py config
 ```
 
-**Every 3-4 days:**
-1. Export tweet data from accounts you're tracking (manually or using a tool)
+**Every 3-4 days (Automatic Method):**
+```bash
+# Fetch latest tweets and analyze - that's it!
+python x-research.py fetch --accounts @sama,@levelsio,@patrick
+python x-research.py analyze --since-last
+```
+
+Review the insights (5-10 minutes) and implement tactical takeaways.
+
+**Total time:** 10-15 minutes vs 3-4 hours of manual research
+
+**Alternative (Manual Method):**
+If you prefer to manually collect data:
+1. Export tweet data from accounts you're tracking
 2. Save as CSV file
 3. Run:
 ```bash
 python x-research.py add data/jan15.csv
 python x-research.py analyze --since-last
 ```
-4. Review the insights (5-10 minutes)
-5. Implement tactical takeaways in your content
-
-**Total time:** 15-20 minutes vs 3-4 hours of manual research
 
 ## How to Get Tweet Data
 
-The tool doesn't scrape X directly - you provide the data. Here are ways to get it:
+### Automatic Fetching (Recommended)
 
-### Manual Method (Free)
+Use the built-in `fetch` command:
+```bash
+python x-research.py fetch --accounts @account1,@account2,@account3
+```
+
+The tool uses browser automation to visit X profiles and extract tweets. This is the fastest and easiest method.
+
+### Manual Methods
+
+If automatic fetching doesn't work for you, alternatives include:
+
+**Manual Collection:**
 1. Create an X List with accounts you want to track
 2. Browse the list weekly
 3. Copy interesting tweets into a spreadsheet
-4. Export as CSV and add to the tool
+4. Export as CSV and import with `add` command
 
-### Using Third-Party Tools
-- Use tools like Taplio, Tweet Hunter, or Typefully to export data
-- Many have CSV export features
+**Third-Party Tools:**
+- Use tools like Taplio, Tweet Hunter, or Typefully
+- Export data as CSV and import
 
-### Browser Extension
-- Use extensions that can export tweets you're viewing
+**Browser Extensions:**
+- Use extensions that export visible tweets
 - Save to CSV format
 
 ## File Structure
@@ -194,11 +256,14 @@ x-research/
 ├── x-research.py          # Main CLI application
 ├── database.py            # Database operations
 ├── data_importer.py       # CSV/JSON import handling
+├── browser_fetcher.py     # Automatic tweet fetching
 ├── analyzer.py            # Claude API integration
+├── requirements.txt       # Python dependencies
 ├── config.json            # Your settings (created on first run)
 ├── database.db            # SQLite database (created on first run)
 ├── data/                  # Put your import files here
-│   └── template.csv       # Example CSV format
+│   ├── template.csv       # Example CSV format
+│   └── template.json      # Example JSON format
 └── reports/               # Generated analysis reports
     └── analysis_2026-01-18_14-30.md
 ```
@@ -250,6 +315,13 @@ export ANTHROPIC_API_KEY='your-key-here'
 - Python 3.8 or higher
 - `anthropic` library (for Claude API)
 - `pandas` library (for CSV handling)
+- `playwright` library (for automatic tweet fetching)
+
+Install all at once:
+```bash
+pip install -r requirements.txt
+playwright install chromium
+```
 
 ## License
 

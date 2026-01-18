@@ -14,6 +14,7 @@ import csv
 from database import Database
 from data_importer import DataImporter
 from analyzer import Analyzer
+from browser_fetcher import BrowserFetcher
 
 
 class XResearch:
@@ -51,6 +52,58 @@ class XResearch:
             sys.exit(1)
         except Exception as e:
             print(f"❌ Unexpected error: {e}")
+            sys.exit(1)
+
+    def cmd_fetch(self, args):
+        """Fetch tweets from X accounts automatically."""
+        print("🌐 Fetching tweets from X accounts...\n")
+
+        # Parse account list
+        if args.accounts:
+            accounts = [a.strip() for a in args.accounts.split(',')]
+        else:
+            print("❌ Error: No accounts specified")
+            print("\nUsage: python x-research.py fetch --accounts @user1,@user2")
+            sys.exit(1)
+
+        # Parse count
+        count = args.count if args.count else 20
+
+        try:
+            # Initialize browser fetcher
+            fetcher = BrowserFetcher()
+
+            # Fetch tweets
+            results = fetcher.fetch_multiple_accounts(
+                accounts,
+                tweets_per_account=count,
+                headless=not args.show_browser
+            )
+
+            # Add all fetched tweets to database
+            total_added = 0
+            total_duplicates = 0
+
+            for account, tweets in results.items():
+                if tweets:
+                    added, duplicates = self.db.add_tweets_bulk(tweets)
+                    total_added += added
+                    total_duplicates += duplicates
+
+            print(f"\n✅ Fetch complete!")
+            print(f"   • Added: {total_added} new tweets")
+            print(f"   • Skipped: {total_duplicates} duplicates")
+
+            if total_added > 0:
+                print(f"\n💡 Run 'python x-research.py analyze' to generate insights")
+
+        except ImportError as e:
+            print(f"❌ {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"❌ Fetch failed: {e}")
+            import traceback
+            traceback.print_exc()
             sys.exit(1)
 
     def cmd_analyze(self, args):
@@ -279,6 +332,15 @@ class XResearch:
         add_parser = subparsers.add_parser('add', help='Add tweets from a file')
         add_parser.add_argument('file', help='CSV or JSON file to import')
 
+        # Fetch command
+        fetch_parser = subparsers.add_parser('fetch', help='Fetch tweets automatically from X accounts')
+        fetch_parser.add_argument('--accounts', required=True,
+                                 help='Comma-separated list of accounts to fetch (e.g., @sama,@levelsio)')
+        fetch_parser.add_argument('--count', type=int, default=20,
+                                 help='Number of tweets to fetch per account (default: 20)')
+        fetch_parser.add_argument('--show-browser', action='store_true',
+                                 help='Show browser window (default: headless mode)')
+
         # Analyze command
         analyze_parser = subparsers.add_parser('analyze', help='Analyze tweets and generate insights')
         analyze_parser.add_argument('--accounts', help='Comma-separated list of accounts to analyze')
@@ -312,6 +374,7 @@ class XResearch:
         # Route to appropriate command
         command_map = {
             'add': self.cmd_add,
+            'fetch': self.cmd_fetch,
             'analyze': self.cmd_analyze,
             'stats': self.cmd_stats,
             'accounts': self.cmd_accounts,

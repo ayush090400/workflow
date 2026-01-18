@@ -7,6 +7,7 @@ Get up and running in 5 minutes.
 ```bash
 cd x-research
 pip install -r requirements.txt
+playwright install chromium
 ```
 
 ## Step 2: Configure API Key
@@ -61,9 +62,20 @@ python x-research.py add data/your_file.csv
 python x-research.py analyze
 ```
 
-### Regular Workflow
+### Regular Workflow - Automatic (Recommended)
 
-Every 3-4 days:
+Every 3-4 days, just run:
+
+```bash
+python x-research.py fetch --accounts @sama,@levelsio,@patrick
+python x-research.py analyze --since-last
+```
+
+Review insights (5-10 mins) and implement takeaways.
+
+### Regular Workflow - Manual
+
+If you prefer manual collection:
 
 1. Collect new tweet data from accounts you're tracking
 2. Save as CSV
