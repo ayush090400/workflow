@@ -1,0 +1,32 @@
+[
+  {
+    "account_handle": "@sama",
+    "tweet_url": "https://x.com/sama/status/123456",
+    "tweet_text": "Just shipped a major update to our product. Here's what's new...",
+    "likes": 1500,
+    "retweets": 230,
+    "replies": 45,
+    "posted_date": "2026-01-15",
+    "notes": "Strong engagement - product updates work well"
+  },
+  {
+    "account_handle": "@levelsio",
+    "tweet_url": "https://x.com/levelsio/status/789012",
+    "tweet_text": "Building in public day 47: Hit $10k MRR this month 🎉",
+    "likes": 2100,
+    "retweets": 340,
+    "replies": 67,
+    "posted_date": "2026-01-14",
+    "notes": "Revenue milestones get great traction"
+  },
+  {
+    "account_handle": "@patrick",
+    "tweet_url": "https://x.com/patrick/status/345678",
+    "tweet_text": "Hot take: Most startups die from indigestion not starvation",
+    "likes": 890,
+    "retweets": 120,
+    "replies": 30,
+    "posted_date": "2026-01-13",
+    "notes": "Controversial takes perform well"
+  }
+]
